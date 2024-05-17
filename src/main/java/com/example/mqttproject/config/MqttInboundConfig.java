@@ -31,6 +31,7 @@ public class MqttInboundConfig {
                 new MqttPahoMessageDrivenChannelAdapter(broker,"Estacion",defaultTopic);
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
+        adapter.setQos(1);
         adapter.setOutputChannel(mqttInboundChannel());
         return adapter;
     }
@@ -40,8 +41,11 @@ public class MqttInboundConfig {
         return new MessageHandler() {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
-                System.out.println(message.getPayload());
+                String topic = (String) message.getHeaders().get("mqtt_topic");
+                String payload = (String) message.getPayload();
+                System.out.println("Mensaje recibido del topico: "+topic+". "+payload);
             }
         };
     }
+
 }
