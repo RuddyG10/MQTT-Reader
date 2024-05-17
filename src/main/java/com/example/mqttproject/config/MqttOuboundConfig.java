@@ -1,6 +1,7 @@
 package com.example.mqttproject.config;
 
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.MessagingGateway;
@@ -14,7 +15,9 @@ import org.springframework.messaging.MessageHandler;
 
 @Configuration
 public class MqttOuboundConfig {
+    @Value("${mqtt.broker}")
     private String broker;
+    @Value("${mqtt.topic}")
     private String defaultTopic;
 
     @Bean
