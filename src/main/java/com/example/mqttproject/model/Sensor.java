@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.Random;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,5 +16,10 @@ public class Sensor {
     private String sensorId;
     private String sensorType;
     private Double value;
-    private LocalDateTime dateTime;
+    private String dateTime;
+
+    public Sensor(String sensorId, String sensorType) {
+        this.sensorId = sensorId;
+        this.sensorType = sensorType;
+    }
 }
