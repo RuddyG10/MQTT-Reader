@@ -1,10 +1,11 @@
 package com.example.mqttproject;
 
-import com.example.mqttproject.config.MqttOuboundConfig;
 import com.example.mqttproject.interfaces.MqttGateway;
 import com.example.mqttproject.model.Sensor;
 import com.example.mqttproject.model.Station;
+import com.example.mqttproject.services.MqttService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,7 +15,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Scanner;
 
 @SpringBootApplication
 public class MqttProjectApplication {
@@ -22,7 +22,8 @@ public class MqttProjectApplication {
     public static void main(String[] args) {
         SpringApplication.run(MqttProjectApplication.class, args);
     }
-
+    @Autowired
+    private MqttService mqttService;
     @Bean
     public CommandLineRunner run(MqttGateway mqttGateway){
         return args -> {
@@ -53,7 +54,6 @@ public class MqttProjectApplication {
             stations.add(station2);
 
             //Iniciacion de proceso de lectura MQTT
-
                     try {
                         for (Station station:
                                 stations) {
@@ -81,13 +81,12 @@ public class MqttProjectApplication {
                                         sensor.setValue(random.nextDouble()*360);
                                         break;
                                 }
-                                String topic = "estacion/"+station.getStationId()+"/sensor/"+sensor.getSensorType();
+                                String topic = "estacion/"+station.getStationId()+"/sensores/"+sensor.getSensorType();
                                 String sensorData = objectMapper.writeValueAsString(sensor);
                                 System.out.println("Enviado datos del sensor: "
                                         +sensor.getSensorType()+", de la estacion: "
                                         +station.getStationId()+", al topico: "
                                         +topic);
-                                System.out.println(sensorData);
                                 mqttGateway.sendToMqtt(sensorData,topic);
                                 Thread.sleep(5000);
 
@@ -96,7 +95,6 @@ public class MqttProjectApplication {
                     }catch (Exception e){
                         e.printStackTrace();
                     }
-
 
         };
     }
