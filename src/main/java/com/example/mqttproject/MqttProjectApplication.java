@@ -96,7 +96,7 @@ public class MqttProjectApplication {
             System.out.println("Informacion Recibida.\n");
             System.out.println("Cerrando aplicacion...");
             SpringApplication.exit(context,()->0);
-
+            System.exit(0);
         };
     }
 
