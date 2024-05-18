@@ -3,12 +3,12 @@ package com.example.mqttproject;
 import com.example.mqttproject.interfaces.MqttGateway;
 import com.example.mqttproject.model.Sensor;
 import com.example.mqttproject.model.Station;
-import com.example.mqttproject.services.MqttService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 import java.time.LocalDateTime;
@@ -22,10 +22,8 @@ public class MqttProjectApplication {
     public static void main(String[] args) {
         SpringApplication.run(MqttProjectApplication.class, args);
     }
-    @Autowired
-    private MqttService mqttService;
     @Bean
-    public CommandLineRunner run(MqttGateway mqttGateway){
+    public CommandLineRunner run(MqttGateway mqttGateway,ApplicationContext context){
         return args -> {
             Random random = new Random();
             ObjectMapper objectMapper = new ObjectMapper();
@@ -54,20 +52,20 @@ public class MqttProjectApplication {
             stations.add(station2);
 
             //Iniciacion de proceso de lectura MQTT
-                    try {
-                        for (Station station:
-                                stations) {
-                            System.out.println(station.getStationId());
-                            for (Sensor sensor:
-                                    station.getSensors()) {
-                                sensor.setDateTime(LocalDateTime.now().toString());
-                                switch (sensor.getSensorType()){
-                                    case "Temperatura":
-                                        sensor.setValue(15 + (10*random.nextDouble()));
-                                        break;
-                                    case "Velocidad del viento":
-                                        sensor.setValue(random.nextDouble()*20);
-                                        break;
+            try {
+                for (Station station:
+                        stations) {
+                    System.out.println("Evaluando Estacion: "+station.getStationId()+"\n");
+                    for (Sensor sensor:
+                            station.getSensors()) {
+                        sensor.setDateTime(LocalDateTime.now().toString());
+                        switch (sensor.getSensorType()){
+                            case "Temperatura":
+                                sensor.setValue(15 + (10*random.nextDouble()));
+                                break;
+                                case "Velocidad del viento":
+                                    sensor.setValue(random.nextDouble()*20);
+                                    break;
                                     case "Precipitacion":
                                         sensor.setValue(random.nextDouble()*100);
                                         break;
@@ -80,21 +78,24 @@ public class MqttProjectApplication {
                                     case "direccion del viento":
                                         sensor.setValue(random.nextDouble()*360);
                                         break;
-                                }
-                                String topic = "estacion/"+station.getStationId()+"/sensores/"+sensor.getSensorType();
-                                String sensorData = objectMapper.writeValueAsString(sensor);
-                                System.out.println("Enviado datos del sensor: "
-                                        +sensor.getSensorType()+", de la estacion: "
-                                        +station.getStationId()+", al topico: "
-                                        +topic);
-                                mqttGateway.sendToMqtt(sensorData,topic);
-                                Thread.sleep(5000);
-
-                            }
                         }
-                    }catch (Exception e){
-                        e.printStackTrace();
+                        String topic = "estacion/"+station.getStationId()+"/sensores/"+sensor.getSensorType();
+                        String sensorData = objectMapper.writeValueAsString(sensor);
+                        System.out.println("Enviado datos del sensor: "
+                                +sensor.getSensorType()+", de la estacion: "
+                                +station.getStationId()+", al topico: "
+                                +topic);
+                        mqttGateway.sendToMqtt(sensorData,topic);
+                        Thread.sleep(5000);
+
                     }
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            System.out.println("Informacion Recibida.\n");
+            System.out.println("Cerrando aplicacion...");
+            SpringApplication.exit(context,()->0);
 
         };
     }
